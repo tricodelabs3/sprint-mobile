@@ -11,7 +11,7 @@ export default function HomeScreen() {
       <Text style={styles.subtitle}>Como está se sentindo hoje?</Text>
 
       <View style={styles.grid}>
-        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAF4FF' }]} onPress={() => router.push('/treino.tsx')}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAF4FF' }]} onPress={() => router.push("treino")}>
           <Ionicons name="barbell-outline" size={28} color="#4A90E2" />
           <Text style={styles.cardText}>Treino</Text>
         </TouchableOpacity>
