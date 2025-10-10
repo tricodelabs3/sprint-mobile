@@ -11,6 +11,7 @@ export default function TreinoScreen() {
     atividade: "",
     duracao: "",
     intensidade: "",
+    exercicios: "",
   });
 
   const [dadosSalvos, setDadosSalvos] = useState<any>(null);
@@ -30,7 +31,7 @@ export default function TreinoScreen() {
   };
 
   const limpar = async () => {
-    setForm({ atividade: "", duracao: "", intensidade: "" });
+    setForm({ atividade: "", duracao: "", intensidade: "", exercicios: "" });
     await AsyncStorage.removeItem("treino");
     setDadosSalvos(null);
   };
@@ -66,6 +67,13 @@ export default function TreinoScreen() {
         onChangeText={(text) => setForm({ ...form, intensidade: text })}
       />
 
+      <TextInput 
+        style={styles.input}
+        placeholder="Exercícios: (ex: Agachamento, Supino, Levantamento Terra)"
+        value={form.exercicios}
+        onChangeText={(text) => setForm({ ...form, exercicios: text })}
+      />
+
       <TouchableOpacity style={styles.botao} onPress={salvar}>
         <Text style={styles.botaoTexto}>Salvar</Text>
       </TouchableOpacity>
@@ -80,6 +88,7 @@ export default function TreinoScreen() {
           <Text>🏋️ {dadosSalvos.atividade}</Text>
           <Text>⏱️ {dadosSalvos.duracao} min</Text>
           <Text>🔥 Intensidade: {dadosSalvos.intensidade}</Text>
+          <Text>💪 Exercícios: {dadosSalvos.exercicios}</Text>
         </View>
       )}
     </ScrollView>
