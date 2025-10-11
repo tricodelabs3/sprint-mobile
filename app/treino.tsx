@@ -39,8 +39,8 @@ export default function TreinoScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.voltar}>
-        <Ionicons name="arrow-back" size={24} color="#4A90E2" />
-        <Text style={{ color: "#4A90E2" }}>Voltar</Text>
+        <Ionicons name="arrow-back" size={24} color="#000000ff" />
+        {/* Add "registro de treino aqui depois" */}
       </TouchableOpacity>
 
       <Text style={styles.titulo}>Registro de Treino</Text>
