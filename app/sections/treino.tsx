@@ -38,13 +38,19 @@ export default function TreinoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.voltar}>
-        <Ionicons name="arrow-back" size={24} color="#000000ff" />
-        {/* Add "registro de treino aqui depois" */}
-      </TouchableOpacity>
 
+      
+      <View style={styles.header}>  
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+
+      </View>
       <Text style={styles.titulo}>Registro de Treino</Text>
 
+
+
+      {/* Formulário */}
       <TextInput
         style={styles.input}
         placeholder="Atividade (ex: Corrida, Musculação)"
@@ -84,9 +90,9 @@ export default function TreinoScreen() {
 
       {dadosSalvos && (
         <View style={styles.boxSalvo}>
-          <Text style={styles.subtitulo}>Último treino salvo:</Text>
-          <Text>🏋️ {dadosSalvos.atividade}</Text>
-          <Text>⏱️ {dadosSalvos.duracao} min</Text>
+          <Text style={styles.subtitulo}>Anotações do último treino:</Text>
+          <Text>🏋️ Atividade: {dadosSalvos.atividade}</Text>
+          <Text>⏱️ Tempo: {dadosSalvos.duracao} min</Text>
           <Text>🔥 Intensidade: {dadosSalvos.intensidade}</Text>
           <Text>💪 Exercícios: {dadosSalvos.exercicios}</Text>
         </View>
@@ -101,16 +107,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
   },
-  voltar: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 15,
   },
+
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -119,7 +128,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   botao: {
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#333",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",

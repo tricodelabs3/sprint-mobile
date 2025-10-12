@@ -7,6 +7,8 @@ export default function NutricionScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      
+      
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -20,6 +22,8 @@ export default function NutricionScreen() {
           <Ionicons name="add" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
+
+
 
       {/* Resumo */}
       <View style={styles.card}>
@@ -108,12 +112,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 15,
   },
-  headerTitle: { fontSize: 20, fontWeight: 'bold' },
+  headerTitle: { fontSize: 22, fontWeight: 'bold' },
   addButton: {
     backgroundColor: '#333',
     borderRadius: 8,
     padding: 6,
   },
+
+  
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
