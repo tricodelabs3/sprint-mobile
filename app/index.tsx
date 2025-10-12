@@ -11,17 +11,18 @@ export default function HomeScreen() {
       <Text style={styles.subtitle}>Como está se sentindo hoje?</Text>
 
       <View style={styles.grid}>
-        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAF4FF' }]} onPress={() => router.push("treino")}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAF4FF' }]} onPress={() => router.push("/sections/treino")}>
           <Ionicons name="barbell-outline" size={28} color="#4A90E2" />
           <Text style={styles.cardText}>Treino</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAFBE7' }]} onPress={() => router.push('/nutricao')}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAFBE7' }]} onPress={() => router.push('/sections/nutricao')}>
           <Ionicons name="nutrition-outline" size={28} color="#4CAF50" />
           <Text style={styles.cardText}>Nutrição</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.card, { backgroundColor: '#F4E9FF' }]} onPress={() => router.push('/sono')}>
+        
+        {/* <TouchableOpacity style={[styles.card, { backgroundColor: '#F4E9FF' }]} onPress={() => router.push('/sono')}>
           <Ionicons name="moon-outline" size={28} color="#9C27B0" />
           <Text style={styles.cardText}>Sono</Text>
         </TouchableOpacity>
@@ -29,7 +30,7 @@ export default function HomeScreen() {
         <TouchableOpacity style={[styles.card, { backgroundColor: '#FFEAF0' }]} onPress={() => router.push('/qualidade')}>
           <Ionicons name="heart-outline" size={28} color="#E91E63" />
           <Text style={styles.cardText}>Qualidade</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={styles.summary}>
@@ -39,8 +40,8 @@ export default function HomeScreen() {
           <Text style={styles.summaryLabel}>min ativos</Text>
           <Text style={[styles.summaryData, { color: '#4CAF50' }]}>1.2k</Text>
           <Text style={styles.summaryLabel}>calorias</Text>
-          <Text style={[styles.summaryData, { color: '#9C27B0' }]}>7.5h</Text>
-          <Text style={styles.summaryLabel}>sono</Text>
+          {/* <Text style={[styles.summaryData, { color: '#9C27B0' }]}>7.5h</Text>
+          <Text style={styles.summaryLabel}>sono</Text> */}
         </View>
       </View>
 

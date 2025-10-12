@@ -12,7 +12,10 @@ export default function NutricionScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
+        
         <Text style={styles.headerTitle}>Nutrição</Text>
+        
+        {/* Botão de adicionar refeição (Futuro) */}
         <TouchableOpacity style={styles.addButton}>
           <Ionicons name="add" size={22} color="#fff" />
         </TouchableOpacity>
