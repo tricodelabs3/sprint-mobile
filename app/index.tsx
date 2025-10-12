@@ -7,7 +7,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Boa noite, João!</Text>
+      <Text style={styles.title}>Boa noite!</Text>
       <Text style={styles.subtitle}>Como está se sentindo hoje?</Text>
 
       <View style={styles.grid}>
