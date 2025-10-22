@@ -1,151 +1,137 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, useEffect } from "react";
+// src/screens/TreinosScreen.tsx
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 
-export default function TreinoScreen() {
-  const router = useRouter();
-
-  const [form, setForm] = useState({
-    atividade: "",
-    duracao: "",
-    intensidade: "",
-    exercicios: "",
-  });
-
-  const [dadosSalvos, setDadosSalvos] = useState<any>(null);
-
-  useEffect(() => {
-    const carregar = async () => {
-      const salvo = await AsyncStorage.getItem("treino");
-      if (salvo) setDadosSalvos(JSON.parse(salvo));
-    };
-    carregar();
-  }, []);
-
-  const salvar = async () => {
-    await AsyncStorage.setItem("treino", JSON.stringify(form));
-    setDadosSalvos(form);
-    Alert.alert("Sucesso!", "Treino salvo com sucesso ✅");
-  };
-
-  const limpar = async () => {
-    setForm({ atividade: "", duracao: "", intensidade: "", exercicios: "" });
-    await AsyncStorage.removeItem("treino");
-    setDadosSalvos(null);
-  };
+export default function TreinosScreen() {
+  const treinos = [
+    {
+      id: 1,
+      titulo: "Treino de Força",
+      duracao: "60 min",
+      calorias: "350 cal",
+      data: "05/01/2024",
+      exercicios: ["Agachamento", "Supino", "Barra fixa"],
+    },
+    {
+      id: 2,
+      titulo: "Cardio HIIT",
+      duracao: "30 min",
+      calorias: "280 cal",
+      data: "04/01/2024",
+      exercicios: ["Burpees", "Jump squat", "Mountain climbers"],
+    },
+  ];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
 
-      
-      <View style={styles.header}>  
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+        <TouchableOpacity>
+          <Ionicons name="arrow-back" size={22} color="#000" />
         </TouchableOpacity>
 
+        <Text style={styles.headerTitle}>Meus Treinos</Text>
+        <TouchableOpacity style={styles.addButton}>
+          <Ionicons name="add" size={20} color="#fff" />
+        </TouchableOpacity>
       </View>
-      <Text style={styles.titulo}>Registro de Treino</Text>
 
-
-
-      {/* Formulário */}
-      <TextInput
-        style={styles.input}
-        placeholder="Atividade (ex: Corrida, Musculação)"
-        value={form.atividade}
-        onChangeText={(text) => setForm({ ...form, atividade: text })}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Duração (em minutos)"
-        keyboardType="numeric"
-        value={form.duracao}
-        onChangeText={(text) => setForm({ ...form, duracao: text })}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Intensidade (leve, média, alta)"
-        value={form.intensidade}
-        onChangeText={(text) => setForm({ ...form, intensidade: text })}
-      />
-
-      <TextInput 
-        style={styles.input}
-        placeholder="Exercícios: (ex: Agachamento, Supino, Levantamento Terra)"
-        value={form.exercicios}
-        onChangeText={(text) => setForm({ ...form, exercicios: text })}
-      />
-
-      <TouchableOpacity style={styles.botao} onPress={salvar}>
-        <Text style={styles.botaoTexto}>Salvar</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.botao, { backgroundColor: "#f55" }]} onPress={limpar}>
-        <Text style={styles.botaoTexto}>Limpar</Text>
-      </TouchableOpacity>
-
-      {dadosSalvos && (
-        <View style={styles.boxSalvo}>
-          <Text style={styles.subtitulo}>Anotações do último treino:</Text>
-          <Text>🏋️ Atividade: {dadosSalvos.atividade}</Text>
-          <Text>⏱️ Tempo: {dadosSalvos.duracao} min</Text>
-          <Text>🔥 Intensidade: {dadosSalvos.intensidade}</Text>
-          <Text>💪 Exercícios: {dadosSalvos.exercicios}</Text>
+      {/* Resumo */}
+      <View style={styles.resumoContainer}>
+        <View style={styles.resumoCard}>
+          <Ionicons name="time-outline" size={24} color="#007AFF" />
+          <Text style={styles.resumoValor}>45</Text>
+          <Text style={styles.resumoDescricao}>min esta semana</Text>
         </View>
-      )}
+        <View style={styles.resumoCard}>
+          <Ionicons name="flame-outline" size={24} color="#34C759" />
+          <Text style={styles.resumoValor}>630</Text>
+          <Text style={styles.resumoDescricao}>calorias queimadas</Text>
+        </View>
+      </View>
+
+      {/* Treinos Recentes */}
+      <Text style={styles.sectionTitle}>Treinos Recentes</Text>
+
+      {treinos.map((t) => (
+        <View key={t.id} style={styles.treinoCard}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.treinoTitulo}>{t.titulo}</Text>
+            <View style={styles.icons}>
+              <Ionicons name="create-outline" size={18} color="#444" style={styles.icon} />
+              <Ionicons name="trash-outline" size={18} color="#e63946" />
+            </View>
+          </View>
+          <View style={styles.treinoInfo}>
+            <Text style={styles.infoText}>{t.duracao}</Text>
+            <Text style={styles.infoText}>{t.calorias}</Text>
+            <Text style={styles.infoData}>{t.data}</Text>
+          </View>
+          <View style={styles.exerciciosContainer}>
+            {t.exercicios.map((ex, index) => (
+              <View key={index} style={styles.exercicioTag}>
+                <Text style={styles.exercicioText}>{ex}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  titulo: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-
-
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-  },
-  botao: {
-    backgroundColor: "#333",
-    padding: 12,
-    borderRadius: 8,
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    justifyContent: "space-between",
+    marginBottom: 16,
   },
-  botaoTexto: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  boxSalvo: {
-    backgroundColor: "#EAF4FF",
-    padding: 15,
+  headerTitle: { fontSize: 18, fontWeight: "600" },
+  addButton: {
+    backgroundColor: "#000",
     borderRadius: 8,
-    marginTop: 15,
+    padding: 6,
   },
-  subtitulo: {
-    fontWeight: "bold",
-    marginBottom: 8,
+  resumoContainer: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 },
+  resumoCard: {
+    flex: 1,
+    alignItems: "center",
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 12,
+    marginHorizontal: 4,
   },
+  resumoValor: { fontSize: 20, fontWeight: "700", marginTop: 8 },
+  resumoDescricao: { color: "#555", fontSize: 13, marginTop: 2 },
+  sectionTitle: { fontSize: 16, fontWeight: "600", marginBottom: 8 },
+  treinoCard: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  treinoTitulo: { fontSize: 15, fontWeight: "600" },
+  icons: { flexDirection: "row" },
+  icon: { marginRight: 10 },
+  treinoInfo: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
+  infoText: { fontSize: 13, color: "#444" },
+  infoData: { fontSize: 13, color: "#777" },
+  exerciciosContainer: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
+  exercicioTag: {
+    backgroundColor: "#f0f0f0",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  exercicioText: { fontSize: 12, color: "#333" },
 });
