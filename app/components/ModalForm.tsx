@@ -13,7 +13,7 @@ interface ModalFormProps {
   visible: boolean;
   title: string;
   fields: Field[];
-  onSubmit: () => void;
+  onSubmit: (values: any) => void;
   onClose: () => void;
   submitLabel?: string;
 }

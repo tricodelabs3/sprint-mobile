@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import ModalForm from "../components/ModalForm";
 
 export default function TreinosScreen() {
-  const treinos = [
+  const [treinos, setTreinos] = useState([
     {
       id: 1,
       titulo: "Treino de Força",
@@ -22,33 +22,41 @@ export default function TreinosScreen() {
       data: "04/01/2024",
       exercicios: ["Burpees", "Jump squat", "Mountain climbers"],
     },
-  ];
+  ]);
 
-  const [showModal, setShowModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // 🔹 Estados para os campos do Modal
   const [nome, setNome] = useState("");
   const [duracao, setDuracao] = useState("");
   const [calorias, setCalorias] = useState("");
   const [exercicios, setExercicios] = useState("");
 
-  const adicionarTreino = () => {
-    console.log({
-      nome,
-      duracao,
-      calorias,
-      exercicios: exercicios.split(",").map((ex) => ex.trim()),
-    });
-    setShowModal(false);
+  function adicionarTreino() {
+    const novo = {
+      id: treinos.length + 1,
+      titulo: nome,
+      duracao: `${duracao} min`,
+      calorias: `${calorias} cal`,
+      data: new Date().toLocaleDateString("pt-BR"),
+      exercicios: exercicios
+        ? exercicios.split(",").map((e) => e.trim())
+        : [],
+    };
+    setTreinos([...treinos, novo]);
+    setModalVisible(false);
+
+    // Limpa os campos após adicionar
     setNome("");
     setDuracao("");
     setCalorias("");
     setExercicios("");
-  };
+  }
 
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#000" />
         </TouchableOpacity>
@@ -56,7 +64,10 @@ export default function TreinosScreen() {
         <Text style={styles.headerTitle}>Meus Treinos</Text>
 
         {/* Botão de adicionar treino */}
-        <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setModalVisible(true)}
+        >
           <Ionicons name="add" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -83,7 +94,12 @@ export default function TreinosScreen() {
           <View style={styles.cardHeader}>
             <Text style={styles.treinoTitulo}>{t.titulo}</Text>
             <View style={styles.icons}>
-              <Ionicons name="create-outline" size={18} color="#444" style={styles.icon} />
+              <Ionicons
+                name="create-outline"
+                size={18}
+                color="#444"
+                style={styles.icon}
+              />
               <Ionicons name="trash-outline" size={18} color="#e63946" />
             </View>
           </View>
@@ -102,9 +118,11 @@ export default function TreinosScreen() {
         </View>
       ))}
 
-      {/* Modal do treino */}
+      {/* Modal para adicionar treino */}
       <ModalForm
-        visible={showModal}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSubmit={adicionarTreino}
         title="Novo Treino"
         fields={[
           { label: "Nome do Treino", placeholder: "Ex: Treino de Força", value: nome, onChangeText: setNome },
@@ -112,8 +130,6 @@ export default function TreinosScreen() {
           { label: "Calorias", value: calorias, onChangeText: setCalorias, keyboardType: "numeric" },
           { label: "Exercícios (separados por vírgula)", placeholder: "Agachamento, Supino...", value: exercicios, onChangeText: setExercicios },
         ]}
-        onSubmit={adicionarTreino}
-        onClose={() => setShowModal(false)}
       />
     </ScrollView>
   );
