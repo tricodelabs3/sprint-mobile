@@ -1,7 +1,8 @@
-// src/screens/TreinosScreen.tsx
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import ModalForm from "../components/ModalForm";
 
 export default function TreinosScreen() {
   const treinos = [
@@ -23,17 +24,39 @@ export default function TreinosScreen() {
     },
   ];
 
+  const [showModal, setShowModal] = useState(false);
+  const [nome, setNome] = useState("");
+  const [duracao, setDuracao] = useState("");
+  const [calorias, setCalorias] = useState("");
+  const [exercicios, setExercicios] = useState("");
+
+  const adicionarTreino = () => {
+    console.log({
+      nome,
+      duracao,
+      calorias,
+      exercicios: exercicios.split(",").map((ex) => ex.trim()),
+    });
+    setShowModal(false);
+    setNome("");
+    setDuracao("");
+    setCalorias("");
+    setExercicios("");
+  };
+
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#000" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Meus Treinos</Text>
-        <TouchableOpacity style={styles.addButton}>
+
+        {/* Botão de adicionar treino */}
+        <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
           <Ionicons name="add" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -78,6 +101,20 @@ export default function TreinosScreen() {
           </View>
         </View>
       ))}
+
+      {/* Modal do treino */}
+      <ModalForm
+        visible={showModal}
+        title="Novo Treino"
+        fields={[
+          { label: "Nome do Treino", placeholder: "Ex: Treino de Força", value: nome, onChangeText: setNome },
+          { label: "Duração (min)", value: duracao, onChangeText: setDuracao, keyboardType: "numeric" },
+          { label: "Calorias", value: calorias, onChangeText: setCalorias, keyboardType: "numeric" },
+          { label: "Exercícios (separados por vírgula)", placeholder: "Agachamento, Supino...", value: exercicios, onChangeText: setExercicios },
+        ]}
+        onSubmit={adicionarTreino}
+        onClose={() => setShowModal(false)}
+      />
     </ScrollView>
   );
 }
