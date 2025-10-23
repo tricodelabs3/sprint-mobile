@@ -1,11 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import ModalForm from "../components/ModalForm";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// 1. Definir a Interface para o Objeto Treino
+interface Treino {
+  id: number;
+  titulo: string;
+  duracao: string;
+  calorias: string;
+  data: string;
+  exercicios: string[];
+}
+
+// Chave para salvar os dados
+const STORAGE_KEY = '@treinos_list';
 
 export default function TreinosScreen() {
-  const [treinos, setTreinos] = useState([
+  
+  // Lista inicial de mock data (agora tipada)
+  const initialTreinos: Treino[] = [
     {
       id: 1,
       titulo: "Treino de Força",
@@ -22,7 +38,10 @@ export default function TreinosScreen() {
       data: "04/01/2024",
       exercicios: ["Burpees", "Jump squat", "Mountain climbers"],
     },
-  ]);
+  ];
+  
+  // 2. Aplicar o tipo ao useState
+  const [treinos, setTreinos] = useState<Treino[]>(initialTreinos); 
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -32,9 +51,41 @@ export default function TreinosScreen() {
   const [calorias, setCalorias] = useState("");
   const [exercicios, setExercicios] = useState("");
 
+
+  // 3. Tipar o parâmetro 'treinosToSave' com Treino[]
+  const saveTreinos = async (treinosToSave: Treino[]) => {
+    try {
+      const jsonValue = JSON.stringify(treinosToSave);
+      await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+    } catch (e) {
+      console.error('Erro ao salvar os treinos: ', e);
+    }
+  };
+
+  const loadTreinos = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      if (jsonValue !== null) {
+        // Ao carregar, faz o parse e garante que o tipo é Treino[]
+        setTreinos(JSON.parse(jsonValue) as Treino[]);
+      } else {
+        setTreinos(initialTreinos);
+        saveTreinos(initialTreinos);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar os treinos: ', e);
+      setTreinos(initialTreinos);
+    }
+  };
+
+  useEffect(() => {
+    loadTreinos();
+  }, []);
+  
   function adicionarTreino() {
-    const novo = {
-      id: treinos.length + 1,
+    // 4. Tipar o objeto 'novo'
+    const novo: Treino = {
+      id: Date.now(), // Usar Date.now() como ID é mais seguro para itens novos
       titulo: nome,
       duracao: `${duracao} min`,
       calorias: `${calorias} cal`,
@@ -43,7 +94,12 @@ export default function TreinosScreen() {
         ? exercicios.split(",").map((e) => e.trim())
         : [],
     };
-    setTreinos([...treinos, novo]);
+    
+    const newTreinos = [...treinos, novo];
+
+    setTreinos(newTreinos);
+    saveTreinos(newTreinos); // Salva a lista atualizada
+
     setModalVisible(false);
 
     // Limpa os campos após adicionar
