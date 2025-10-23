@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native"; // Adicionado 'Alert'
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import ModalForm from "../components/ModalForm";
@@ -9,8 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface Treino {
   id: number;
   titulo: string;
-  duracao: string;
-  calorias: string;
+  duracao: string; // Ex: "60 min"
+  calorias: string; // Ex: "350 cal"
   data: string;
   exercicios: string[];
 }
@@ -35,15 +35,17 @@ export default function TreinosScreen() {
       titulo: "Cardio HIIT",
       duracao: "30 min",
       calorias: "280 cal",
-      data: "04/01/2024",
+      data: "04/01/202cios",
       exercicios: ["Burpees", "Jump squat", "Mountain climbers"],
     },
   ];
   
-  // 2. Aplicar o tipo ao useState
   const [treinos, setTreinos] = useState<Treino[]>(initialTreinos); 
 
   const [modalVisible, setModalVisible] = useState(false);
+  
+  // 🔹 NOVO: Estado para rastrear se estamos editando e qual treino
+  const [editingTreino, setEditingTreino] = useState<Treino | null>(null);
 
   // 🔹 Estados para os campos do Modal
   const [nome, setNome] = useState("");
@@ -52,7 +54,10 @@ export default function TreinosScreen() {
   const [exercicios, setExercicios] = useState("");
 
 
-  // 3. Tipar o parâmetro 'treinosToSave' com Treino[]
+  // ------------------------------------------------------------------
+  // FUNÇÕES DE PERSISTÊNCIA (mantidas)
+  // ------------------------------------------------------------------
+
   const saveTreinos = async (treinosToSave: Treino[]) => {
     try {
       const jsonValue = JSON.stringify(treinosToSave);
@@ -66,7 +71,6 @@ export default function TreinosScreen() {
     try {
       const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
       if (jsonValue !== null) {
-        // Ao carregar, faz o parse e garante que o tipo é Treino[]
         setTreinos(JSON.parse(jsonValue) as Treino[]);
       } else {
         setTreinos(initialTreinos);
@@ -82,13 +86,26 @@ export default function TreinosScreen() {
     loadTreinos();
   }, []);
   
+  
+  // ------------------------------------------------------------------
+  // FUNÇÕES CRUD
+  // ------------------------------------------------------------------
+
+  // 1. Lógica para Adicionar/Editar
+  function handleSubmit() {
+    if (editingTreino) {
+      editarTreino();
+    } else {
+      adicionarTreino();
+    }
+  }
+
   function adicionarTreino() {
-    // 4. Tipar o objeto 'novo'
     const novo: Treino = {
-      id: Date.now(), // Usar Date.now() como ID é mais seguro para itens novos
+      id: Date.now(),
       titulo: nome,
-      duracao: `${duracao} min`,
-      calorias: `${calorias} cal`,
+      duracao: `${duracao} min`, // Adiciona 'min'
+      calorias: `${calorias} cal`, // Adiciona 'cal'
       data: new Date().toLocaleDateString("pt-BR"),
       exercicios: exercicios
         ? exercicios.split(",").map((e) => e.trim())
@@ -96,18 +113,80 @@ export default function TreinosScreen() {
     };
     
     const newTreinos = [...treinos, novo];
-
     setTreinos(newTreinos);
-    saveTreinos(newTreinos); // Salva a lista atualizada
+    saveTreinos(newTreinos);
+    handleCloseModal();
+  }
 
+  function editarTreino() {
+    const updatedTreino: Treino = {
+      ...editingTreino!, // O '!' afirma que editingTreino não é null
+      titulo: nome,
+      // Assume que 'duracao' e 'calorias' estão sem unidades no campo de input
+      duracao: `${duracao} min`,
+      calorias: `${calorias} cal`,
+      exercicios: exercicios
+        ? exercicios.split(",").map((e) => e.trim())
+        : [],
+    };
+
+    const newTreinos = treinos.map(t => 
+      t.id === updatedTreino.id ? updatedTreino : t
+    );
+    
+    setTreinos(newTreinos);
+    saveTreinos(newTreinos);
+    handleCloseModal();
+  }
+  
+  function excluirTreino(id: number, titulo: string) {
+    Alert.alert(
+      "Confirmar Exclusão",
+      `Tem certeza que deseja excluir o treino "${titulo}"?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          onPress: () => {
+            const newTreinos = treinos.filter(t => t.id !== id);
+            setTreinos(newTreinos);
+            saveTreinos(newTreinos);
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  }
+
+  // 2. Funções de Abertura/Fechamento do Modal
+  function handleOpenEditModal(treino: Treino) {
+    setEditingTreino(treino);
+    // Remove ' min' e ' cal' para preencher o input corretamente
+    setNome(treino.titulo);
+    setDuracao(treino.duracao.replace(' min', '')); 
+    setCalorias(treino.calorias.replace(' cal', ''));
+    setExercicios(treino.exercicios.join(', '));
+    setModalVisible(true);
+  }
+
+  function handleOpenAddModal() {
+    setEditingTreino(null);
+    setNome("");
+    setDuracao("");
+    setCalorias("");
+    setExercicios("");
+    setModalVisible(true);
+  }
+
+  function handleCloseModal() {
     setModalVisible(false);
-
-    // Limpa os campos após adicionar
+    setEditingTreino(null);
     setNome("");
     setDuracao("");
     setCalorias("");
     setExercicios("");
   }
+
 
   return (
     <ScrollView style={styles.container}>
@@ -122,13 +201,13 @@ export default function TreinosScreen() {
         {/* Botão de adicionar treino */}
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setModalVisible(true)}
+          onPress={handleOpenAddModal}
         >
           <Ionicons name="add" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* Resumo */}
+      {/* Resumo (mantido) */}
       <View style={styles.resumoContainer}>
         <View style={styles.resumoCard}>
           <Ionicons name="time-outline" size={24} color="#007AFF" />
@@ -143,20 +222,30 @@ export default function TreinosScreen() {
       </View>
 
       {/* Treinos Recentes */}
-      <Text style={styles.sectionTitle}>Treinos Recentes</Text>
+      <Text style={styles.sectionTitle}>Treinos Salvos</Text>
 
       {treinos.map((t) => (
         <View key={t.id} style={styles.treinoCard}>
           <View style={styles.cardHeader}>
             <Text style={styles.treinoTitulo}>{t.titulo}</Text>
             <View style={styles.icons}>
-              <Ionicons
-                name="create-outline"
-                size={18}
-                color="#444"
-                style={styles.icon}
-              />
-              <Ionicons name="trash-outline" size={18} color="#e63946" />
+
+
+              {/* Botão de Editar */}
+              <TouchableOpacity onPress={() => handleOpenEditModal(t)}> 
+                <Ionicons
+                  name="create-outline"
+                  size={18}
+                  color="#444"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+
+
+              {/* Botão de Excluir */}
+              <TouchableOpacity onPress={() => excluirTreino(t.id, t.titulo)}> 
+                <Ionicons name="trash-outline" size={18} color="#e63946" />
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.treinoInfo}>
@@ -174,12 +263,13 @@ export default function TreinosScreen() {
         </View>
       ))}
 
-      {/* Modal para adicionar treino */}
+      {/* Modal para adicionar/editar treino */}
       <ModalForm
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSubmit={adicionarTreino}
-        title="Novo Treino"
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
+        title={editingTreino ? "Editar Treino" : "Novo Treino"}
+        submitLabel={editingTreino ? "Salvar Alterações" : "Adicionar"}
         fields={[
           { label: "Nome do Treino", placeholder: "Ex: Treino de Força", value: nome, onChangeText: setNome },
           { label: "Duração (min)", value: duracao, onChangeText: setDuracao, keyboardType: "numeric" },
