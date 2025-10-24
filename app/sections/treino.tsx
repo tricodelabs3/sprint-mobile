@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native"; // Adicionado 'Alert'
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import ModalForm from "../components/ModalForm";
+import ModalForm from "../../components/ModalForm";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 1. Definir a Interface para o Objeto Treino
