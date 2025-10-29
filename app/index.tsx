@@ -22,7 +22,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         
-        {/* <TouchableOpacity style={[styles.card, { backgroundColor: '#F4E9FF' }]} onPress={() => router.push('/sono')}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: '#F4E9FF' }]} onPress={() => router.push('/sono')}>
           <Ionicons name="moon-outline" size={28} color="#9C27B0" />
           <Text style={styles.cardText}>Sono</Text>
         </TouchableOpacity>
@@ -30,7 +30,7 @@ export default function HomeScreen() {
         <TouchableOpacity style={[styles.card, { backgroundColor: '#FFEAF0' }]} onPress={() => router.push('/qualidade')}>
           <Ionicons name="heart-outline" size={28} color="#E91E63" />
           <Text style={styles.cardText}>Qualidade</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
 
       <View style={styles.summary}>
