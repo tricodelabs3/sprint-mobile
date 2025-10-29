@@ -297,9 +297,12 @@ export default function NutricionScreen() {
           { label: "Nome da Refeição", placeholder: "Ex: Almoço", value: titulo, onChangeText: setTitulo },
           { label: "Horário (HH:MM)", placeholder: "08:00", value: horario, onChangeText: setHorario },
           { label: "Calorias (kcal)", value: calorias, onChangeText: setCalorias, keyboardType: "numeric" },
-          { label: "Proteína (g)", value: proteina, onChangeText: setProteina, keyboardType: "numeric" },
-          { label: "Carboidratos (g)", value: carbos, onChangeText: setCarbos, keyboardType: "numeric" },
-          { label: "Gordura (g)", value: gordura, onChangeText: setGordura, keyboardType: "numeric" },
+          // AQUI: Agrupamento dos 3 campos em uma linha (Array de Fields)
+          [ 
+            { label: "Proteína (g)", value: proteina, onChangeText: setProteina, keyboardType: "numeric" },
+            { label: "Carboidratos (g)", value: carbos, onChangeText: setCarbos, keyboardType: "numeric" },
+            { label: "Gordura (g)", value: gordura, onChangeText: setGordura, keyboardType: "numeric" },
+          ],
         ]}
       />
     </ScrollView>

@@ -9,10 +9,14 @@ interface Field {
   keyboardType?: "default" | "numeric";
 }
 
+// Um FormField pode ser um único Field ou uma lista de Fields (para uma linha/row)
+type FormField = Field | Field[];
+
 interface ModalFormProps {
   visible: boolean;
   title: string;
-  fields: Field[];
+  // O array de fields agora aceita Field ou Field[]
+  fields: FormField[]; 
   onSubmit: (values: any) => void;
   onClose: () => void;
   submitLabel?: string;
@@ -21,11 +25,27 @@ interface ModalFormProps {
 export default function ModalForm({
   visible,
   title,
-  fields,
+  fields, 
   onSubmit,
   onClose,
   submitLabel = "Adicionar",
 }: ModalFormProps) {
+    
+    // Função para renderizar um único campo
+    const renderField = (field: Field, isRowItem: boolean = false, index: number) => (
+        // Se for um item de linha, usa styles.rowItem
+        <View key={index} style={[styles.field, isRowItem && styles.rowItem]}>
+            <Text style={styles.label}>{field.label}</Text>
+            <TextInput
+                style={styles.input}
+                placeholder={field.placeholder}
+                value={field.value}
+                onChangeText={field.onChangeText}
+                keyboardType={field.keyboardType || "default"}
+            />
+        </View>
+    );
+
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
@@ -37,18 +57,20 @@ export default function ModalForm({
             </Pressable>
           </View>
 
-          {fields.map((field, index) => (
-            <View key={index} style={styles.field}>
-              <Text style={styles.label}>{field.label}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={field.placeholder}
-                value={field.value}
-                onChangeText={field.onChangeText}
-                keyboardType={field.keyboardType || "default"}
-              />
-            </View>
-          ))}
+          {/* Mapeia sobre FormField[] */}
+          {fields.map((formField, index) => {
+              // Verifica se o item é um array de fields (uma linha)
+              if (Array.isArray(formField)) {
+                  return (
+                      <View key={index} style={styles.rowContainer}>
+                          {/* Renderiza cada campo da linha com a flag isRowItem=true */}
+                          {formField.map((field, subIndex) => renderField(field, true, subIndex))}
+                      </View>
+                  );
+              }
+              // Caso contrário, é um único campo
+              return renderField(formField, false, index);
+          })}
 
           <Pressable style={styles.button} onPress={onSubmit}>
             <Text style={styles.buttonText}>{submitLabel}</Text>
@@ -100,4 +122,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   buttonText: { color: "#fff", fontWeight: "bold" },
+  // NOVO ESTILO: Container para uma linha de campos
+  rowContainer: { 
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      marginBottom: 0 
+  }, 
+  // NOVO ESTILO: Item dentro de uma linha
+  rowItem: {
+      flex: 1, // Faz com que ocupe o espaço dividido
+      marginRight: 10, // Espaçamento entre os campos da linha
+      marginBottom: 10 // Margem na parte inferior
+  }
 });
