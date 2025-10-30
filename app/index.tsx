@@ -27,7 +27,7 @@ export default function HomeScreen() {
           <Text style={styles.cardText}>Sono</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.card, { backgroundColor: '#FFEAF0' }]} onPress={() => router.push('/qualidade')}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: '#FFEAF0' }]} onPress={() => router.push('/sections/qualidade')}>
           <Ionicons name="heart-outline" size={28} color="#E91E63" />
           <Text style={styles.cardText}>Qualidade</Text>
         </TouchableOpacity>
