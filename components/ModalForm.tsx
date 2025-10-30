@@ -15,7 +15,6 @@ type FormField = Field | Field[];
 interface ModalFormProps {
   visible: boolean;
   title: string;
-  // O array de fields agora aceita Field ou Field[]
   fields: FormField[]; 
   onSubmit: (values: any) => void;
   onClose: () => void;
@@ -32,19 +31,32 @@ export default function ModalForm({
 }: ModalFormProps) {
     
     // Função para renderizar um único campo
-    const renderField = (field: Field, isRowItem: boolean = false, index: number) => (
-        // Se for um item de linha, usa styles.rowItem
-        <View key={index} style={[styles.field, isRowItem && styles.rowItem]}>
-            <Text style={styles.label}>{field.label}</Text>
-            <TextInput
-                style={styles.input}
-                placeholder={field.placeholder}
-                value={field.value}
-                onChangeText={field.onChangeText}
-                keyboardType={field.keyboardType || "default"}
-            />
-        </View>
-    );
+    const renderField = (field: Field, index: number, totalFields: number) => {
+        const isRowItem = totalFields > 1;
+
+        const containerStyle = [
+            // Container para um único item (coluna) ou um item de linha
+            isRowItem ? styles.rowItemContainer : styles.singleItemContainer, 
+            // 🟢 Aplica marginRight APENAS se for um item de linha E não for o último
+            isRowItem && index < totalFields - 1 && styles.rowMarginRight
+        ];
+
+        return (
+            <View 
+                key={index} 
+                style={containerStyle}
+            >
+                <Text style={styles.label}>{field.label}</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder={field.placeholder}
+                    value={field.value}
+                    onChangeText={field.onChangeText}
+                    keyboardType={field.keyboardType || "default"}
+                />
+            </View>
+        );
+    };
 
   return (
     <Modal transparent visible={visible} animationType="fade">
@@ -57,19 +69,19 @@ export default function ModalForm({
             </Pressable>
           </View>
 
-          {/* Mapeia sobre FormField[] */}
           {fields.map((formField, index) => {
-              // Verifica se o item é um array de fields (uma linha)
               if (Array.isArray(formField)) {
                   return (
+                      // 🟢 rowContainer: Apenas flexDirection: 'row' para garantir o uso total do flex
                       <View key={index} style={styles.rowContainer}>
-                          {/* Renderiza cada campo da linha com a flag isRowItem=true */}
-                          {formField.map((field, subIndex) => renderField(field, true, subIndex))}
+                          {formField.map((field, subIndex) => 
+                            renderField(field, subIndex, formField.length)
+                          )}
                       </View>
                   );
               }
-              // Caso contrário, é um único campo
-              return renderField(formField, false, index);
+              // Caso contrário, é um único campo (totalFields = 1)
+              return renderField(formField, index, 1);
           })}
 
           <Pressable style={styles.button} onPress={onSubmit}>
@@ -91,13 +103,15 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 20,
-    width: "85%",
+    padding: 10,
+    width: "90%",
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 5,
   },
+
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -106,7 +120,17 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: "bold" },
   close: { fontSize: 20, color: "#666" },
-  field: { marginBottom: 10 },
+  
+  // ESTILOS DE CONTAINER DE CAMPO REVISADOS
+  singleItemContainer: { marginBottom: 10 }, 
+  
+  // 🟢 rowItemContainer: Apenas flex: 1 e marginBottom (sem margens horizontais)
+  rowItemContainer: { 
+    flex: 1, 
+    marginBottom: 10,
+    minWidth: 0, // Essencial para evitar que o texto longo force a largura
+  }, 
+  
   label: { fontSize: 14, color: "#555", marginBottom: 4 },
   input: {
     backgroundColor: "#f3f3f3",
@@ -122,16 +146,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   buttonText: { color: "#fff", fontWeight: "bold" },
-  // NOVO ESTILO: Container para uma linha de campos
+  
+  // Container de linha (parent)
+  // 🟢 rowContainer: Limpo para apenas row, permitindo que os filhos flex: 1 se expandam
   rowContainer: { 
       flexDirection: 'row', 
-      justifyContent: 'space-between', 
-      marginBottom: 0 
   }, 
-  // NOVO ESTILO: Item dentro de uma linha
-  rowItem: {
-      flex: 1, // Faz com que ocupe o espaço dividido
-      marginRight: 10, // Espaçamento entre os campos da linha
-      marginBottom: 10 // Margem na parte inferior
+  // 🟢 rowMarginRight: Novo estilo que aplica a margem necessária
+  rowMarginRight: {
+      marginRight: 10,
   }
 });
