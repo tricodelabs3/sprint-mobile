@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     marginBottom: 20,
     width: '100%',
+    height: 150,
   },
 
   weatherLeft: {
