@@ -7,37 +7,35 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router"; 
 import { Colors } from "../../constants/Colors";
 
-// 1. Interface para os Tipos de Dicas
 interface Tip {
   id: number;
-  icon: keyof typeof Ionicons.glyphMap; // Corrigido para usar a chave correta
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
   difficulty: "Fácil" | "Médio" | "Difícil";
   time: string;
   category: "Mental" | "Física" | "Emocional";
-  color: string; // Cor do card
-  iconColor: string; // Cor do ícone
+  color: string; 
+  iconColor: string; 
 }
 
 type TabName = "Todas" | "Mental" | "Física" | "Emocional";
 
-// 2. Dados Mockados baseados nas imagens
 const tipsData: Tip[] = [
   {
     id: 1,
-    icon: "sparkles-outline", // 👈 CORRIGIDO: Ícone válido
+    icon: "sparkles-outline",
     title: "Pratique Mindfulness",
     description:
       "Reserve 10 minutos diários para meditação. Isso pode reduzir o estresse e melhorar o foco.",
     difficulty: "Fácil",
     time: "10 min",
     category: "Mental",
-    color: "#F4E9FF", // Roxo claro
-    iconColor: "#9C27B0",
+    color: Colors.brand.sonoBg, 
+    iconColor: Colors.brand.sono,
   },
   {
     id: 2,
@@ -48,8 +46,8 @@ const tipsData: Tip[] = [
     difficulty: "Fácil",
     time: "Todo dia",
     category: "Física",
-    color: "#EAF4FF", // Azul claro
-    iconColor: "#4A90E2",
+    color: Colors.brand.treinoBg, 
+    iconColor: Colors.brand.treino,
   },
   {
     id: 3,
@@ -60,8 +58,8 @@ const tipsData: Tip[] = [
     difficulty: "Fácil",
     time: "5 min",
     category: "Mental",
-    color: "#FFEAF0", // Rosa claro
-    iconColor: "#E91E63",
+    color: Colors.brand.qualidadeBg, 
+    iconColor: Colors.brand.qualidade,
   },
   {
     id: 4,
@@ -72,8 +70,8 @@ const tipsData: Tip[] = [
     difficulty: "Fácil",
     time: "20 min",
     category: "Física",
-    color: "#FFF7E0", // Amarelo claro
-    iconColor: "#FFB300",
+    color: Colors.brand.alertaBg, 
+    iconColor: Colors.brand.alerta,
   },
   {
     id: 5,
@@ -84,40 +82,25 @@ const tipsData: Tip[] = [
     difficulty: "Médio",
     time: "30 min",
     category: "Mental",
-    color: "#EAFBE7", // Verde claro
-    iconColor: "#4CAF50",
-  },
-  {
-    id: 6,
-    icon: "happy-outline",
-    title: "Conecte-se com Pessoas",
-    description:
-      "Mantenha contato regular com amigos e família. Relacionamentos saudáveis são essenciais.",
-    difficulty: "Fácil",
-    time: "Variável",
-    category: "Emocional",
-    color: "#FFF3E8", // Laranja claro
-    iconColor: "#FF5722",
+    color: Colors.brand.nutricaoBg, 
+    iconColor: Colors.brand.nutricao,
   },
 ];
 
 const tabs: { name: TabName; icon: keyof typeof Ionicons.glyphMap }[] = [
   { name: "Todas", icon: "heart-circle-outline" },
-  { name: "Mental", icon: "sparkles-outline" }, // 👈 CORRIGIDO: Ícone válido
+  { name: "Mental", icon: "sparkles-outline" },
   { name: "Física", icon: "barbell-outline" },
   { name: "Emocional", icon: "happy-outline" },
 ];
 
-// 3. Componente da Barra de Progresso
-const ProgressBar = ({ progress }: { progress: number }) => (
+const ProgressBar = ({ progress, color }: { progress: number; color: string }) => (
   <View style={styles.progressBarContainer}>
-    <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+    <View style={[styles.progressBar, { width: `${progress * 100}%`, backgroundColor: color }]} />
   </View>
 );
 
-// 4. Componente Principal
 export default function QualidadeScreen() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabName>("Todas");
 
   // Filtra as dicas baseado na aba ativa
@@ -126,11 +109,6 @@ export default function QualidadeScreen() {
     return tip.category === activeTab;
   });
 
-  // ------------------------------------------------------------------
-  // Funções de Renderização
-  // ------------------------------------------------------------------
-
-  // Renderiza um card de dica
   const renderTipCard = (tip: Tip) => (
     <View
       key={tip.id}
@@ -156,10 +134,10 @@ export default function QualidadeScreen() {
 
   // Renderiza o card de desafio
   const renderChallengeCard = () => (
-    <View style={[styles.challengeCard, { backgroundColor: "#EAF4FF" }]}>
+    <View style={[styles.challengeCard, { backgroundColor: Colors.brand.treinoBg }]}>
       <View style={styles.tipHeader}>
-        <Ionicons name="trophy-outline" size={24} color="#4A90E2" />
-        <Text style={[styles.tipTitle, { color: "#4A90E2" }]}>
+        <Ionicons name="trophy-outline" size={24} color={Colors.brand.treino} />
+        <Text style={[styles.tipTitle, { color: Colors.brand.treino }]}>
           Desafio da Semana
         </Text>
       </View>
@@ -171,128 +149,115 @@ export default function QualidadeScreen() {
         respiração. Isso pode reduzir significativamente o estresse e ansiedade.
       </Text>
       <Text style={styles.progressLabel}>Progresso: 3/7 dias</Text>
-      <ProgressBar progress={3 / 7} />
+      <ProgressBar progress={3 / 7} color={Colors.brand.treino} />
     </View>
   );
 
-  // ------------------------------------------------------------------
-  // JSX Principal
-  // ------------------------------------------------------------------
   return (
-  <>
+    <>
       <Stack.Screen 
         options={{ 
           title: "Qualidade de Vida",
-          headerShown: true, // Garante que o header seja visível
-
+          headerShown: true, 
           headerStyle: { backgroundColor: Colors.white },
           headerTintColor: Colors.text,
           headerTitleStyle: { fontWeight: 'bold' },
-          headerShadowVisible: false,
+          headerShadowVisible: false, 
         }} 
       />
 
-      {/* Container principal com ScrollView */}
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-
-      {/* Card de Índice de Bem-estar */}
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Seu Índice de Bem-estar</Text>
-        <Text style={styles.summaryScore}>78</Text>
-        <Text style={styles.summaryScoreLabel}>pontuação geral</Text>
-        <View style={styles.summarySubRow}>
-          <View style={styles.summarySubItem}>
-            <Text style={[styles.summarySubScore, { color: "#4A90E2" }]}>
-              82
-            </Text>
-            <Text style={styles.summarySubLabel}>Mental</Text>
-          </View>
-          <View style={styles.summarySubItem}>
-            <Text style={[styles.summarySubScore, { color: "#4CAF50" }]}>
-              75
-            </Text>
-            <Text style={styles.summarySubLabel}>Física</Text>
-          </View>
-          <View style={styles.summarySubItem}>
-            <Text style={[styles.summarySubScore, { color: "#E91E63" }]}>
-              80
-            </Text>
-            <Text style={styles.summarySubLabel}>Emocional</Text>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        
+        {/* Card de Índice de Bem-estar */}
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Seu Índice de Bem-estar</Text>
+          <Text style={styles.summaryScore}>78</Text>
+          <Text style={styles.summaryScoreLabel}>pontuação geral</Text>
+          <View style={styles.summarySubRow}>
+            <View style={styles.summarySubItem}>
+              <Text style={[styles.summarySubScore, { color: Colors.brand.treino }]}>
+                82
+              </Text>
+              <Text style={styles.summarySubLabel}>Mental</Text>
+            </View>
+            <View style={styles.summarySubItem}>
+              <Text style={[styles.summarySubScore, { color: Colors.brand.nutricao }]}>
+                75
+              </Text>
+              <Text style={styles.summarySubLabel}>Física</Text>
+            </View>
+            <View style={styles.summarySubItem}>
+              <Text style={[styles.summarySubScore, { color: Colors.brand.qualidade }]}>
+                80
+              </Text>
+              <Text style={styles.summarySubLabel}>Emocional</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* Filtros */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabContainer}
-      >
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.name}
-            style={[
-              styles.tabButton,
-              activeTab === tab.name && styles.tabButtonActive,
-            ]}
-            onPress={() => setActiveTab(tab.name)}
-          >
-            <Ionicons
-              name={tab.icon}
-              size={18}
-              color={activeTab === tab.name ? "#fff" : "#555"}
-            />
-            <Text
+        {/* Filtros */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabContainer}
+        >
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.name}
               style={[
-                styles.tabText,
-                activeTab === tab.name && styles.tabTextActive,
+                styles.tabButton,
+                activeTab === tab.name && styles.tabButtonActive,
               ]}
+              onPress={() => setActiveTab(tab.name)}
             >
-              {tab.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Ionicons
+                name={tab.icon}
+                size={18}
+                color={activeTab === tab.name ? Colors.white : Colors.textSecondary}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab.name && styles.tabTextActive,
+                ]}
+              >
+                {tab.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Título da Seção */}
+        <Text style={styles.sectionTitle}>Dicas Personalizadas</Text>
+
+        {/* Lista de Dicas */}
+        {filteredTips.map(renderTipCard)}
+
+        {/* Card de Desafio (só aparece na aba "Todas") */}
+        {activeTab === "Todas" && renderChallengeCard()}
       </ScrollView>
-
-      {/* Título da Seção */}
-      <Text style={styles.sectionTitle}>Dicas Personalizadas</Text>
-
-      {/* Lista de Dicas */}
-      {filteredTips.map(renderTipCard)}
-
-      {/* Card de Desafio (só aparece na aba "Todas") */}
-      {activeTab === "Todas" && renderChallengeCard()}
-    </ScrollView>
     </>
   );
 }
 
-// 5. Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
     paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
   },
   // Card de Resumo
   summaryCard: {
-    backgroundColor: "#F8F8F8",
+    backgroundColor: Colors.lightBackground,
     borderRadius: 16,
     padding: 20,
     alignItems: "center",
     marginVertical: 16,
-    shadowColor: "#000",
+    shadowColor: Colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -300,18 +265,18 @@ const styles = StyleSheet.create({
   },
   summaryTitle: {
     fontSize: 16,
-    color: "#666",
+    color: Colors.textSecondary,
     fontWeight: "600",
   },
   summaryScore: {
     fontSize: 64,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.text,
     marginVertical: 4,
   },
   summaryScoreLabel: {
     fontSize: 14,
-    color: "#666",
+    color: Colors.textSecondary,
     marginTop: -8,
   },
   summarySubRow: {
@@ -329,7 +294,7 @@ const styles = StyleSheet.create({
   },
   summarySubLabel: {
     fontSize: 14,
-    color: "#666",
+    color: Colors.textSecondary,
     marginTop: 4,
   },
   // Abas de Filtro
@@ -340,30 +305,30 @@ const styles = StyleSheet.create({
   tabButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: Colors.lightGray,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 10,
   },
   tabButtonActive: {
-    backgroundColor: "#333",
+    backgroundColor: Colors.text,
   },
   tabText: {
     marginLeft: 6,
     fontWeight: "600",
-    color: "#555",
+    color: Colors.textSecondary,
     fontSize: 14,
   },
   tabTextActive: {
-    color: "#fff",
+    color: Colors.white,
   },
   // Dicas
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginVertical: 16,
-    color: "#333",
+    color: Colors.text,
   },
   tipCard: {
     borderRadius: 16,
@@ -373,14 +338,14 @@ const styles = StyleSheet.create({
   tipHeader: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap", // Para as tags quebrarem a linha se necessário
+    flexWrap: "wrap", 
   },
   tipTitle: {
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 10,
-    flex: 1, // Faz o título ocupar o espaço, empurrando as tags
-    minWidth: 100, // Garante que o título tenha espaço antes de quebrar
+    flex: 1, 
+    minWidth: 100, 
   },
   tagContainer: {
     flexDirection: "row",
@@ -391,16 +356,16 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
     marginLeft: 6,
-    marginTop: 4, // Permite que a tag quebre a linha em telas menores
+    marginTop: 4, 
   },
   tagText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#333",
+    color: Colors.text,
   },
   tipDescription: {
     fontSize: 14,
-    color: "#555",
+    color: Colors.textSecondary,
     marginTop: 8,
     lineHeight: 20,
   },
@@ -414,11 +379,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 8,
-    color: "#333",
+    color: Colors.text,
   },
   progressLabel: {
     fontSize: 12,
-    color: "#666",
+    color: Colors.textSecondary,
     marginTop: 12,
     marginBottom: 4,
     fontWeight: "500",
@@ -431,7 +396,6 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: "100%",
-    backgroundColor: "#4A90E2", // Cor do progresso
     borderRadius: 4,
   },
 });
