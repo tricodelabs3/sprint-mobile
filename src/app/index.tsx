@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import { useEffect, useState } from 'react';
@@ -20,6 +20,13 @@ export default function HomeScreen() {
   }, []);
 
   return (
+    <>
+      <Stack.Screen 
+        options={{ 
+          headerShown: false, // Garante que o header seja visível
+        }} 
+      />
+
     <ScrollView
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
@@ -114,6 +121,7 @@ export default function HomeScreen() {
         </Text>
       </View>
     </ScrollView>
+    </>
   );
 }
 
