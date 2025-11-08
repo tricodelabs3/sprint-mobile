@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { Colors } from "../../constants/Colors";
 
 // 1. Interface para os Tipos de Dicas
 interface Tip {
@@ -178,19 +179,21 @@ export default function QualidadeScreen() {
   // JSX Principal
   // ------------------------------------------------------------------
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Qualidade de Vida</Text>
-        <View style={{ width: 24 }} />
-      </View>
+  <>
+      <Stack.Screen 
+        options={{ 
+          title: "Qualidade de Vida",
+          headerShown: true, // Garante que o header seja visível
+
+          headerStyle: { backgroundColor: Colors.white },
+          headerTintColor: Colors.text,
+          headerTitleStyle: { fontWeight: 'bold' },
+          headerShadowVisible: false,
+        }} 
+      />
+
+      {/* Container principal com ScrollView */}
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
       {/* Card de Índice de Bem-estar */}
       <View style={styles.summaryCard}>
@@ -260,6 +263,7 @@ export default function QualidadeScreen() {
       {/* Card de Desafio (só aparece na aba "Todas") */}
       {activeTab === "Todas" && renderChallengeCard()}
     </ScrollView>
+    </>
   );
 }
 
