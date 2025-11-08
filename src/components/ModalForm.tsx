@@ -9,7 +9,6 @@ interface Field {
   keyboardType?: "default" | "numeric";
 }
 
-// Um FormField pode ser um único Field ou uma lista de Fields (para uma linha/row)
 type FormField = Field | Field[];
 
 interface ModalFormProps {
@@ -35,9 +34,7 @@ export default function ModalForm({
         const isRowItem = totalFields > 1;
 
         const containerStyle = [
-            // Container para um único item (coluna) ou um item de linha
             isRowItem ? styles.rowItemContainer : styles.singleItemContainer, 
-            // 🟢 Aplica marginRight APENAS se for um item de linha E não for o último
             isRowItem && index < totalFields - 1 && styles.rowMarginRight
         ];
 
@@ -72,7 +69,6 @@ export default function ModalForm({
           {fields.map((formField, index) => {
               if (Array.isArray(formField)) {
                   return (
-                      // 🟢 rowContainer: Apenas flexDirection: 'row' para garantir o uso total do flex
                       <View key={index} style={styles.rowContainer}>
                           {formField.map((field, subIndex) => 
                             renderField(field, subIndex, formField.length)
@@ -80,7 +76,6 @@ export default function ModalForm({
                       </View>
                   );
               }
-              // Caso contrário, é um único campo (totalFields = 1)
               return renderField(formField, index, 1);
           })}
 
@@ -121,14 +116,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: "bold" },
   close: { fontSize: 20, color: "#666" },
   
-  // ESTILOS DE CONTAINER DE CAMPO REVISADOS
   singleItemContainer: { marginBottom: 10 }, 
   
-  // 🟢 rowItemContainer: Apenas flex: 1 e marginBottom (sem margens horizontais)
   rowItemContainer: { 
     flex: 1, 
     marginBottom: 10,
-    minWidth: 0, // Essencial para evitar que o texto longo force a largura
+    minWidth: 0,
   }, 
   
   label: { fontSize: 14, color: "#555", marginBottom: 4 },
@@ -147,12 +140,9 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: "#fff", fontWeight: "bold" },
   
-  // Container de linha (parent)
-  // 🟢 rowContainer: Limpo para apenas row, permitindo que os filhos flex: 1 se expandam
   rowContainer: { 
       flexDirection: 'row', 
   }, 
-  // 🟢 rowMarginRight: Novo estilo que aplica a margem necessária
   rowMarginRight: {
       marginRight: 10,
   }

@@ -99,8 +99,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
-    justifyContent: 'center', // 👈 centraliza verticalmente
-    alignItems: 'center', // 👈 centraliza horizontalmente
+    justifyContent: 'center', // Centraliza verticalmente
+    alignItems: 'center', // Centraliza horizontalmente
     backgroundColor: '#fff',
     padding: 20,
     paddingBottom: 60,
