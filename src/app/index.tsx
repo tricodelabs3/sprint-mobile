@@ -1,51 +1,72 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../constants/Colors';
+import { useEffect, useState } from 'react';
+import { fetchWeather, WeatherData } from '../services/WeatherService';
 
 export default function HomeScreen() {
   const router = useRouter();
 
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+
+  useEffect(() => {
+    // Função para carregar os dados
+    const loadWeather = async () => {
+      const data = await fetchWeather();
+      setWeather(data);
+    };
+    loadWeather();
+  }, []);
+
   return (
     <ScrollView
-      contentContainerStyle={styles.contentContainer} // 👈 importante para centralizar
+      contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.title}>Olá!</Text>
       <Text style={styles.subtitle}>Como está se sentindo hoje ?</Text>
 
-
-      {/* CARD DE CLIMA */}
+      {/* CARD DE CLIMA (Agora dinâmico) */}
       <View style={styles.weatherCard}>
         <View style={styles.weatherLeft}>
           <View style={styles.weatherIconBox}>
-            <Ionicons name="partly-sunny-outline" size={32} color="#fff" />
+            <Ionicons 
+              name={weather?.icon || 'time-outline'} 
+              size={32} 
+              color={Colors.white} 
+            />
           </View>
         </View>
 
         <View style={styles.weatherRight}>
           <View style={styles.weatherTopRow}>
-            <Text style={styles.weatherMain}>Entardecer</Text>
-            <View style={styles.weatherDetails}>
-              <View style={styles.weatherDetailItem}>
-                <Ionicons name="water-outline" size={14} color="#777" />
-                <Text style={styles.weatherDetailText}> 65%</Text>
+            <Text style={styles.weatherMain}>
+              {weather ? weather.description : 'Carregando...'}
+            </Text>
+            {weather && ( // Só mostra detalhes se o clima foi carregado
+              <View style={styles.weatherDetails}>
+                <View style={styles.weatherDetailItem}>
+                  <Ionicons name="water-outline" size={14} color={Colors.textSecondary} />
+                  <Text style={styles.weatherDetailText}> {weather.humidity}</Text>
+                </View>
+                <View style={styles.weatherDetailItem}>
+                  <Ionicons name="arrow-forward-outline" size={14} color={Colors.textSecondary} />
+                  <Text style={styles.weatherDetailText}> {weather.wind}</Text>
+                </View>
               </View>
-              <View style={styles.weatherDetailItem}>
-                <Ionicons name="arrow-forward-outline" size={14} color="#777" />
-                <Text style={styles.weatherDetailText}> 12 km/h</Text>
-              </View>
-            </View>
+            )}
           </View>
 
-          <Text style={styles.weatherTemp}>25°C</Text>
-          <Text style={styles.weatherLocation}>São Paulo, Brasil</Text>
+          <Text style={styles.weatherTemp}>{weather ? weather.temp : '--'}</Text>
+          <Text style={styles.weatherLocation}>{weather ? weather.location : '...'}</Text>
         </View>
       </View>
 
       {/* CARDS PRINCIPAIS */}
       <View style={styles.grid}>
-        <TouchableOpacity style={[styles.card, { backgroundColor: '#EAF4FF' }]} onPress={() => router.push("/sections/treino")}>
-          <Ionicons name="barbell-outline" size={28} color="#4A90E2" />
+        <TouchableOpacity style={[styles.card, { backgroundColor: Colors.brand.treinoBg }]} onPress={() => router.push("/sections/treino")}>
+          <Ionicons name="barbell-outline" size={28} color={Colors.brand.treino} />
           <Text style={styles.cardText}>Treino</Text>
         </TouchableOpacity>
 

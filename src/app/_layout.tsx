@@ -1,15 +1,19 @@
 import { Stack } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "../constants/Colors";
 
 export default function Layout() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "slide_from_right",
-        }}
-      />
-    </SafeAreaView>
+    <Stack
+      screenOptions={{
+        // headerShown: false,
+        animation: "slide_from_right",
+        
+        // Definições globais de estilo para o header
+        headerStyle: { backgroundColor: Colors.white },
+        headerTintColor: Colors.text,
+        headerTitleStyle: { fontWeight: 'bold' },
+        headerShadowVisible: false,
+      }}
+    />
   );
 }

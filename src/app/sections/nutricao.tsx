@@ -1,26 +1,43 @@
-import React, { useEffect, useState } from 'react'; // 👈 CORRIGIDO: useState e useEffect importados de 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable, Alert } from 'react-native'; // 👈 CORRIGIDO: Alert adicionado
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  ScrollView, 
+  Pressable, 
+  Alert 
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ModalForm from '../../components/ModalForm';
+import ModalForm, { FormLayout } from '../../components/ModalForm';
+import { useForm } from 'react-hook-form';
+import { Colors } from '../../constants/Colors';
 
-// 1. Interface para o Objeto Refeição
 interface Refeicao {
   id: number;
   titulo: string;
   horario: string;
-  calorias: string; // Ex: "420 cal"
-  proteina: string; // Ex: "25g prot"
-  carbos: string; // Ex: "45g carbs"
-  gordura: string; // Ex: "12g gord"
+  calorias: string;
+  proteina: string;
+  carbos: string;  
+  gordura: string; 
 }
 
-// Chave para salvar os dados
+interface FormData {
+    titulo: string;
+    horario: string;
+    calorias: string;
+    proteina: string;
+    carbos: string;
+    gordura: string;
+}
+
 const STORAGE_KEY = '@refeicoes_list';
+const META_CALORICA = 2000; // Meta de exemplo
 
 export default function NutricionScreen() {
-  const router = useRouter();
 
   // Dados iniciais
   const initialRefeicoes: Refeicao[] = [
@@ -49,19 +66,21 @@ export default function NutricionScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingRefeicao, setEditingRefeicao] = useState<Refeicao | null>(null);
 
-  // Estados para os campos do Modal
-  const [titulo, setTitulo] = useState("");
-  const [horario, setHorario] = useState("");
-  const [calorias, setCalorias] = useState("");
-  const [proteina, setProteina] = useState("");
-  const [carbos, setCarbos] = useState("");
-  const [gordura, setGordura] = useState("");
+  // 3. Inicialização do react-hook-form
+  const { 
+    control, 
+    handleSubmit, 
+    reset, 
+    setValue, 
+    formState: { errors } 
+  } = useForm<FormData>({
+    defaultValues: {
+        titulo: '', horario: '', calorias: '', proteina: '', carbos: '', gordura: '',
+    },
+    // Adicionar ZOD para validação aqui dps
+  });
 
-
-  // ------------------------------------------------------------------
-  // FUNÇÕES DE PERSISTÊNCIA
-  // ------------------------------------------------------------------
-
+  // Funções de Persistência (usando AsyncStorage como exemplo)
   const saveRefeicoes = async (refeicoesToSave: Refeicao[]) => {
     try {
       const jsonValue = JSON.stringify(refeicoesToSave);
@@ -78,7 +97,7 @@ export default function NutricionScreen() {
         setRefeicoes(JSON.parse(jsonValue) as Refeicao[]);
       } else {
         setRefeicoes(initialRefeicoes);
-        saveRefeicoes(initialRefeicoes);
+        await saveRefeicoes(initialRefeicoes);
       }
     } catch (e) {
       console.error('Erro ao carregar as refeições: ', e);
@@ -90,59 +109,62 @@ export default function NutricionScreen() {
     loadRefeicoes();
   }, []);
 
-  // ------------------------------------------------------------------
-  // FUNÇÕES CRUD e MODAL
-  // ------------------------------------------------------------------
 
-  function cleanForm() {
-    setTitulo("");
-    setHorario("");
-    setCalorias("");
-    setProteina("");
-    setCarbos("");
-    setGordura("");
+  // CRUD
+  // Reseta o formulário e o estado de edição
+  const cleanForm = useCallback(() => {
+    reset();
     setEditingRefeicao(null);
-  }
+  }, [reset]);
 
+  // Fecha o modal e limpa o formulário
   function handleCloseModal() {
     setModalVisible(false);
     cleanForm();
   }
 
+  // Abre o modal para ADICIONAR
   function handleOpenAddModal() {
     cleanForm();
     setModalVisible(true);
   }
 
+  // Abre o modal para EDITAR
   function handleOpenEditModal(refeicao: Refeicao) {
     setEditingRefeicao(refeicao);
-    setTitulo(refeicao.titulo);
-    setHorario(refeicao.horario);
-    // Remove as unidades para preencher o input corretamente
-    setCalorias(refeicao.calorias.replace(' cal', ''));
-    setProteina(refeicao.proteina.replace('g prot', ''));
-    setCarbos(refeicao.carbos.replace('g carbs', ''));
-    setGordura(refeicao.gordura.replace('g gord', ''));
+    
+    setValue('titulo', refeicao.titulo);
+    setValue('horario', refeicao.horario);
+    setValue('calorias', refeicao.calorias.replace(' cal', ''));
+    setValue('proteina', refeicao.proteina.replace('g prot', ''));
+    setValue('carbos', refeicao.carbos.replace('g carbs', ''));
+    setValue('gordura', refeicao.gordura.replace('g gord', ''));
+    
     setModalVisible(true);
   }
 
-  function handleSubmit() {
+  const onSubmit = (data: FormData) => {
+    if (!data.titulo || !data.horario || !data.calorias) {
+        Alert.alert("Erro", "Preencha pelo menos o Título, Horário e Calorias.");
+        return;
+    }
+
     if (editingRefeicao) {
-      editarRefeicao();
+      editarRefeicao(data);
     } else {
-      adicionarRefeicao();
+      adicionarRefeicao(data);
     }
   }
 
-  function adicionarRefeicao() {
+  function adicionarRefeicao(data: FormData) {
     const novaRefeicao: Refeicao = {
       id: Date.now(),
-      titulo: titulo,
-      horario: horario,
-      calorias: `${calorias} cal`,
-      proteina: `${proteina}g prot`,
-      carbos: `${carbos}g carbs`,
-      gordura: `${gordura}g gord`,
+      titulo: data.titulo,
+      horario: data.horario,
+      calorias: `${data.calorias || 0} cal`,
+      proteina: `${data.proteina || 0}g prot`,
+      carbos: `${data.carbos || 0}g carbs`,
+      gordura: `${data.gordura || 0}g gord`,
     };
     
     const newRefeicoes = [...refeicoes, novaRefeicao];
@@ -151,15 +173,15 @@ export default function NutricionScreen() {
     handleCloseModal();
   }
 
-  function editarRefeicao() {
+  function editarRefeicao(data: FormData) {
     const updatedRefeicao: Refeicao = {
       ...editingRefeicao!,
-      titulo: titulo,
-      horario: horario,
-      calorias: `${calorias} cal`,
-      proteina: `${proteina}g prot`,
-      carbos: `${carbos}g carbs`,
-      gordura: `${gordura}g gord`,
+      titulo: data.titulo,
+      horario: data.horario,
+      calorias: `${data.calorias || 0} cal`,
+      proteina: `${data.proteina || 0}g prot`,
+      carbos: `${data.carbos || 0}g carbs`,
+      gordura: `${data.gordura || 0}g gord`,
     };
 
     const newRefeicoes = refeicoes.map(r => 
@@ -179,10 +201,10 @@ export default function NutricionScreen() {
         { text: "Cancelar", style: "cancel" },
         {
           text: "Excluir",
-          onPress: () => {
+          onPress: async () => {
             const newRefeicoes = refeicoes.filter(r => r.id !== id);
             setRefeicoes(newRefeicoes);
-            saveRefeicoes(newRefeicoes);
+            await saveRefeicoes(newRefeicoes);
           },
           style: "destructive",
         },
@@ -190,184 +212,235 @@ export default function NutricionScreen() {
     );
   }
   
-  // ------------------------------------------------------------------
-  // CÁLCULOS DE RESUMO (COM TIPAGEM CORRIGIDA)
-  // ------------------------------------------------------------------
 
-  // Extrai apenas o número da string de caloria (Ex: "420 cal" -> 420)
   const extractValue = (valueString: string) => {
     const match = valueString.match(/(\d+)/);
     return match ? parseInt(match[0], 10) : 0;
   };
   
-  // CORREÇÃO: Tipagem explícita para 'sum' (number) e 'r' (Refeicao)
-  const totalCalorias = refeicoes.reduce((sum: number, r: Refeicao) => sum + extractValue(r.calorias), 0);
-  const totalProteina = refeicoes.reduce((sum: number, r: Refeicao) => sum + extractValue(r.proteina), 0);
-  
-  const metaCalorica = 2000;
-  const progresso = Math.min(100, (totalCalorias / metaCalorica) * 100);
+  const { totalCalorias, totalProteina, progresso } = useMemo(() => {
+    const calorias = refeicoes.reduce((sum: number, r: Refeicao) => sum + extractValue(r.calorias), 0);
+    const proteina = refeicoes.reduce((sum: number, r: Refeicao) => sum + extractValue(r.proteina), 0);
+    const progressoPercent = Math.min(100, (calorias / META_CALORICA) * 100);
+    
+    return {
+      totalCalorias: calorias,
+      totalProteina: proteina,
+      progresso: progressoPercent,
+    };
+  }, [refeicoes]); 
+
+  // Define o layout do formulário para o ModalForm
+  const formFields: FormLayout[] = [
+    { name: "titulo", label: "Nome da Refeição", placeholder: "Ex: Almoço" },
+    { name: "horario", label: "Horário (HH:MM)", placeholder: "08:00" },
+    { name: "calorias", label: "Calorias (kcal)", keyboardType: "numeric", placeholder: "450" },
+    [ 
+      { name: "proteina", label: "Proteína (g)", keyboardType: "numeric", placeholder: "25" },
+      { name: "carbos", label: "Carboidratos (g)", keyboardType: "numeric", placeholder: "45" },
+      { name: "gordura", label: "Gordura (g)", keyboardType: "numeric", placeholder: "12" },
+    ],
+  ];
+
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      
-      
-      {/* Header */}
-      <View style={styles.header}>
-        
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>Nutrição</Text>
-        
-        {/* Botão de adicionar refeição */}
-        <TouchableOpacity style={styles.addButton} onPress={handleOpenAddModal}>
-          <Ionicons name="add" size={22} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-
-
-      {/* Resumo */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Resumo de Hoje</Text>
-        <View style={styles.row}>
-          <View style={styles.summaryItem}>
-            <Ionicons name="nutrition-outline" size={22} color="#4CAF50" />
-            <Text style={styles.value}>{totalCalorias}</Text>
-            <Text style={styles.label}>calorias consumidas</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Ionicons name="water-outline" size={22} color="#2196F3" />
-            <Text style={styles.value}>{totalProteina}g</Text>
-            <Text style={styles.label}>proteína</Text>
-          </View>
-        </View>
-
-        <View style={styles.progressContainer}>
-          <Text style={styles.metaText}>Meta diária</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progress, { width: `${progresso}%` }]} />
-          </View>
-          <Text style={styles.metaDetail}>{totalCalorias} / {metaCalorica} cal</Text>
-        </View>
-      </View>
-
-      {/* Refeições */}
-      <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Refeições de Hoje</Text>
-
-      {/* Mapeia e Renderiza as Refeições do Estado */}
-      {refeicoes.map((r) => (
-        <View key={r.id} style={styles.mealCard}>
-          <View style={styles.mealHeader}>
-            <Text style={styles.mealTitle}>{r.titulo}</Text>
-            <Text style={styles.mealTime}>{r.horario}</Text>
-          </View>
-
-          <View style={styles.macros}>
-            <Text style={styles.macro}>{r.calorias}</Text>
-            <Text style={styles.macro}>{r.proteina}</Text>
-            <Text style={styles.macro}>{r.carbos}</Text>
-            <Text style={styles.macro}>{r.gordura}</Text>
-          </View>
-
-          <View style={styles.mealActions}>
-            {/* Botão de Editar */}
-            <Pressable onPress={() => handleOpenEditModal(r)}>
-              <Ionicons name="create-outline" size={18} color="#444" />
-            </Pressable>
-            {/* Botão de Excluir */}
-            <Pressable onPress={() => excluirRefeicao(r.id, r.titulo)}>
-              <Ionicons name="trash-outline" size={18} color="#E91E63" />
-            </Pressable>
-          </View>
-        </View>
-      ))}
-
-      <View style={{ height: 40 }} />
-
-      {/* Modal para adicionar/editar refeição */}
-      <ModalForm
-        visible={modalVisible}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
-        title={editingRefeicao ? "Editar Refeição" : "Nova Refeição"}
-        submitLabel={editingRefeicao ? "Salvar Alterações" : "Adicionar"}
-        fields={[
-          { label: "Nome da Refeição", placeholder: "Ex: Almoço", value: titulo, onChangeText: setTitulo },
-          { label: "Horário (HH:MM)", placeholder: "08:00", value: horario, onChangeText: setHorario },
-          { label: "Calorias (kcal)", value: calorias, onChangeText: setCalorias, keyboardType: "numeric" },
-          // AQUI: Agrupamento dos 3 campos em uma linha (Array de Fields)
-          [ 
-            { label: "Proteína (g)", value: proteina, onChangeText: setProteina, keyboardType: "numeric" },
-            { label: "Carboidratos (g)", value: carbos, onChangeText: setCarbos, keyboardType: "numeric" },
-            { label: "Gordura (g)", value: gordura, onChangeText: setGordura, keyboardType: "numeric" },
-          ],
-        ]}
+    <>
+      <Stack.Screen 
+        options={{ 
+          title: "Nutrição",
+          headerShown: true, // Garante que o header seja visível
+          headerRight: () => (
+            <TouchableOpacity 
+              style={[styles.headerButton, { backgroundColor: Colors.brand.nutricao }]} 
+              onPress={handleOpenAddModal}
+            >
+              <Ionicons name="add" size={22} color={Colors.actionIcon} />
+            </TouchableOpacity>
+          ),
+          headerStyle: { backgroundColor: Colors.white },
+          headerTintColor: Colors.text,
+          headerTitleStyle: { fontWeight: 'bold' },
+          headerShadowVisible: false,
+        }} 
       />
-    </ScrollView>
+
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        
+        {/* Bloco de Resumo */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Resumo de Hoje</Text>
+          <View style={styles.row}>
+            <View style={styles.summaryItem}>
+              <Ionicons name="nutrition-outline" size={22} color={Colors.brand.nutricao} />
+              <Text style={styles.value}>{totalCalorias}</Text>
+              <Text style={styles.label}>calorias consumidas</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Ionicons name="water-outline" size={22} color={Colors.info} />
+              <Text style={styles.value}>{totalProteina}g</Text>
+              <Text style={styles.label}>proteína</Text>
+            </View>
+          </View>
+
+          <View style={styles.progressContainer}>
+            <Text style={styles.metaText}>Meta diária</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progress, { width: `${progresso}%` }]} />
+            </View>
+            <Text style={styles.metaDetail}>{totalCalorias} / {META_CALORICA} cal</Text>
+          </View>
+        </View>
+
+        {/* Título da Seção */}
+        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Refeições de Hoje</Text>
+
+        {refeicoes.map((r) => (
+          <View key={r.id} style={styles.mealCard}>
+            <View style={styles.mealHeader}>
+              <Text style={styles.mealTitle}>{r.titulo}</Text>
+              <Text style={styles.mealTime}>{r.horario}</Text>
+            </View>
+
+            <View style={styles.macros}>
+              <Text style={styles.macro}>{r.calorias}</Text>
+              <Text style={styles.macro}>{r.proteina}</Text>
+              <Text style={styles.macro}>{r.carbos}</Text>
+              <Text style={styles.macro}>{r.gordura}</Text>
+            </View>
+
+            <View style={styles.mealActions}>
+              <Pressable onPress={() => handleOpenEditModal(r)}>
+                <Ionicons name="create-outline" size={18} color={Colors.textSecondary} />
+              </Pressable>
+              <Pressable onPress={() => excluirRefeicao(r.id, r.titulo)}>
+                <Ionicons name="trash-outline" size={18} color={Colors.danger} />
+              </Pressable>
+            </View>
+          </View>
+        ))}
+
+        <View style={{ height: 40 }} />
+
+        <ModalForm
+          visible={modalVisible}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit(onSubmit)}
+          title={editingRefeicao ? "Editar Refeição" : "Nova Refeição"}
+          submitLabel={editingRefeicao ? "Salvar Alterações" : "Adicionar"}
+          control={control}
+          errors={errors}
+          fields={formFields}
+        />
+      </ScrollView>
+    </>
   );
 }
 
-// ... (styles permanecem inalterados)
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
+  container: { 
+    flex: 1, 
+    backgroundColor: Colors.white, 
+    padding: 20 
   },
-  headerTitle: { fontSize: 22, fontWeight: 'bold' },
-  addButton: {
-    backgroundColor: '#333',
+  headerButton: { // Botão no header nativo
+    backgroundColor: Colors.brand.nutricao,
     borderRadius: 8,
     padding: 6,
+    marginRight: 10,
   },
-
-  
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOpacity: 0.08,
     shadowRadius: 5,
     elevation: 3,
   },
-  sectionTitle: { fontWeight: 'bold', fontSize: 16, marginBottom: 10 },
-  row: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 },
-  summaryItem: { alignItems: 'center' },
-  value: { fontSize: 20, fontWeight: 'bold', marginTop: 4 },
-  label: { color: '#777', fontSize: 12 },
-  progressContainer: { marginTop: 10 },
-  metaText: { color: '#777', marginBottom: 4 },
+  sectionTitle: { 
+    fontWeight: 'bold', 
+    fontSize: 16, 
+    marginBottom: 10,
+    color: Colors.text,
+  },
+  row: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-around', 
+    marginBottom: 10 
+  },
+  summaryItem: { 
+    alignItems: 'center' 
+  },
+  value: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    marginTop: 4,
+    color: Colors.text,
+  },
+  label: { 
+    color: Colors.textSecondary, 
+    fontSize: 12 
+  },
+  progressContainer: { 
+    marginTop: 10 
+  },
+  metaText: { 
+    color: Colors.textSecondary, 
+    marginBottom: 4 
+  },
   progressBar: {
     height: 8,
-    backgroundColor: '#eee',
+    backgroundColor: Colors.lightGray,
     borderRadius: 10,
     overflow: 'hidden',
   },
   progress: {
     height: 8,
-    backgroundColor: '#4CAF50',
+    backgroundColor: Colors.brand.nutricao,
   },
-  metaDetail: { textAlign: 'right', fontSize: 12, color: '#666', marginTop: 4 },
+  metaDetail: { 
+    textAlign: 'right', 
+    fontSize: 12, 
+    color: Colors.textSecondary, 
+    marginTop: 4 
+  },
   mealCard: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 14,
     marginTop: 10,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  mealHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  mealTitle: { fontWeight: 'bold', fontSize: 15 },
-  mealTime: { fontSize: 13, color: '#777' },
-  macros: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  macro: { fontSize: 13, color: '#555' },
+  mealHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: 6 
+  },
+  mealTitle: { 
+    fontWeight: 'bold', 
+    fontSize: 15,
+    color: Colors.text,
+  },
+  mealTime: { 
+    fontSize: 13, 
+    color: Colors.textSecondary 
+  },
+  macros: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginTop: 8,
+    flexWrap: 'wrap', // Permite quebra de linha em telas menores
+  },
+  macro: { 
+    fontSize: 13, 
+    color: Colors.textSecondary,
+    marginRight: 5, // Adiciona espaço entre os macros
+  },
   mealActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
